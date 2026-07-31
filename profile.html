@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - Synapse Tracker</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="manifest" href="manifest.json">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="index.html" class="nav-brand"><i class="fas fa-chart-network"></i> SYNAPSE</a>
+        <div class="nav-links">
+            <a href="index.html">Dashboard</a>
+            <a href="habits.html">Daily Habits</a>
+            <a href="profile.html" class="active">Profile</a>
+        </div>
+    </nav>
+
+    <div class="container" style="max-width: 600px;">
+        <div class="page-title">
+            <h1>IDENTITY</h1>
+            <p>User Configuration</p>
+        </div>
+
+        <div class="card">
+            <div class="profile-pic-wrapper">
+                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Synapse" alt="Avatar" class="avatar" id="avatarImg">
+                <div class="avatar-overlay"><i class="fas fa-camera"></i></div>
+                <!-- File Input for Profile Picture -->
+                <input type="file" id="picInput" accept="image/*">
+            </div>
+            
+            <h2 style="font-family: var(--font-heading); color: var(--text-main); text-align: center; margin-bottom: 25px;" id="displayName">Subject #001</h2>
+
+            <div class="form-group">
+                <label for="profName">Display Name</label>
+                <input type="text" id="profName" placeholder="Enter your alias...">
+            </div>
+
+            <div class="form-group">
+                <label for="profTarget">Ultimate Goal</label>
+                <input type="text" id="profTarget" placeholder="e.g. Consistency in everything">
+            </div>
+
+            <button class="btn btn-magenta" onclick="saveProfile()"><i class="fas fa-save"></i> Save Configuration</button>
+            <p id="saveMsg" style="color: var(--neon-green); text-align: center; margin-top: 15px; display: none; font-family: var(--font-heading);">Profile Updated!</p>
+        </div>
+    </div>
+
+    <script>
+        const picInput = document.getElementById('picInput');
+        const avatarImg = document.getElementById('avatarImg');
+
+        // Load existing profile & photo
+        function loadProfile() {
+            const data = JSON.parse(localStorage.getItem('synapse_profile')) || { name: '', target: '' };
+            const savedAvatar = localStorage.getItem('synapse_avatar_b64');
+            
+            if(savedAvatar) avatarImg.src = savedAvatar;
+            document.getElementById('profName').value = data.name;
+            document.getElementById('profTarget').value = data.target;
+            
+            if(data.name) document.getElementById('displayName').innerText = data.name;
+        }
+
+        // Handle Image Upload Selection (Convert to Base64)
+        picInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if(file) {
+                // Ensure file size isn't too huge for localStorage (max ~5MB usually, but let's keep it simple)
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const base64Img = e.target.result;
+                    avatarImg.src = base64Img;
+                    localStorage.setItem('synapse_avatar_b64', base64Img); // Save instantly
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        function saveProfile() {
+            const data = {
+                name: document.getElementById('profName').value,
+                target: document.getElementById('profTarget').value
+            };
+            localStorage.setItem('synapse_profile', JSON.stringify(data));
+            
+            if(data.name) document.getElementById('displayName').innerText = data.name;
+
+            const msg = document.getElementById('saveMsg');
+            msg.style.display = 'block';
+            setTimeout(() => { msg.style.display = 'none'; }, 3000);
+        }
+
+        document.addEventListener("DOMContentLoaded", loadProfile);
+    </script>
+</body>
+</html>

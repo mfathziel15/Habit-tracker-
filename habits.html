@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Habits & Calendar - Synapse Tracker</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="manifest" href="manifest.json">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="index.html" class="nav-brand"><i class="fas fa-chart-network"></i> SYNAPSE</a>
+        <div class="nav-links">
+            <a href="index.html">Dashboard</a>
+            <a href="habits.html" class="active">Daily Habits</a>
+            <a href="profile.html">Profile</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-title">
+            <h1>DAILY PROTOCOLS</h1>
+            <p>Manage your habits and view your monthly streak.</p>
+        </div>
+
+        <div class="dashboard-grid">
+            <!-- DAILY HABITS TRACKER -->
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2 class="card-title" style="margin: 0;"><i class="fas fa-list-check"></i> Check-in</h2>
+                    <span style="color: var(--neon-magenta); font-family: var(--font-heading); font-weight: bold;" id="todayBadge">TODAY</span>
+                </div>
+
+                <div class="input-group">
+                    <input type="text" id="habitInput" placeholder="Initialize new habit (e.g. Code for 1 hour)...">
+                    <button class="btn" onclick="addHabit()">Add</button>
+                </div>
+
+                <ul class="habit-list" id="habitList"></ul>
+            </div>
+
+            <!-- MONTHLY STREAK CALENDAR -->
+            <div class="card">
+                <h2 class="card-title"><i class="fas fa-calendar-check"></i> Monthly Streak Calendar</h2>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <button class="btn-icon" onclick="changeMonth(-1)"><i class="fas fa-chevron-left"></i></button>
+                    <h3 id="monthYearDisplay" style="color: var(--text-main); font-family: var(--font-heading); text-transform: uppercase;">MAY 2026</h3>
+                    <button class="btn-icon" onclick="changeMonth(1)"><i class="fas fa-chevron-right"></i></button>
+                </div>
+                
+                <div class="monthly-calendar" id="calendarGrid">
+                    <!-- JS renders calendar here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        // Calendar State
+        let currentCalDate = new Date();
+
+        function renderHabits() {
+            const list = document.getElementById('habitList');
+            list.innerHTML = '';
+            
+            habits.forEach((habit, index) => {
+                const li = document.createElement('li');
+                li.className = 'habit-item';
+                li.innerHTML = `
+                    <label class="habit-info">
+                        <input type="checkbox" class="neon-checkbox" ${habit.completed ? 'checked' : ''} onchange="toggleHabit(${index})">
+                        <span class="habit-text">${habit.name}</span>
+                    </label>
+                    <button class="btn-icon" onclick="deleteHabit(${index})"><i class="fas fa-times"></i></button>
+                `;
+                list.appendChild(li);
+            });
+        }
+
+        function addHabit() {
+            const input = document.getElementById('habitInput');
+            const val = input.value.trim();
+            if(val) {
+                habits.push({ name: val, completed: false });
+                input.value = '';
+                saveData();
+                renderHabits();
+                updateStreakLogic();
+                renderCalendar();
+            }
+        }
+
+        document.getElementById('habitInput').addEventListener('keypress', e => {
+            if(e.key === 'Enter') addHabit();
+        });
+
+        function toggleHabit(index) {
+            habits[index].completed = !habits[index].completed;
+            saveData();
+            renderHabits();
+            updateStreakLogic();
+            renderCalendar(); // Update calendar instantly if today lights up
+        }
+
+        function deleteHabit(index) {
+            habits.splice(index, 1);
+            saveData();
+            renderHabits();
+            updateStreakLogic();
+            renderCalendar();
+        }
+
+        // MONTHLY CALENDAR LOGIC
+        function renderCalendar() {
+            const calGrid = document.getElementById('calendarGrid');
+            const monthYearText = document.getElementById('monthYearDisplay');
+            calGrid.innerHTML = '';
+
+            const year = currentCalDate.getFullYear();
+            const month = currentCalDate.getMonth(); // 0-11
+            
+            // Set Header text
+            const options = { month: 'long', year: 'numeric' };
+            monthYearText.innerText = currentCalDate.toLocaleDateString('en-US', options);
+
+            const firstDay = new Date(year, month, 1).getDay(); // Sun = 0, Mon = 1
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            // Headers
+            const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            daysOfWeek.forEach(day => {
+                const el = document.createElement('div');
+                el.className = 'cal-header';
+                el.innerText = day;
+                calGrid.appendChild(el);
+            });
+
+            // Blank spaces for offset
+            for(let i = 0; i < firstDay; i++) {
+                calGrid.appendChild(document.createElement('div'));
+            }
+
+            // Days
+            for(let i = 1; i <= daysInMonth; i++) {
+                const el = document.createElement('div');
+                el.className = 'cal-day';
+                el.innerText = i;
+
+                // Format string YYYY-MM-DD
+                const mStr = String(month + 1).padStart(2, '0');
+                const dStr = String(i).padStart(2, '0');
+                const loopDateStr = `${year}-${mStr}-${dStr}`;
+
+                if(stats.history.includes(loopDateStr)) {
+                    el.classList.add('active');
+                }
+                if(loopDateStr === todayStr) {
+                    el.classList.add('today');
+                }
+
+                calGrid.appendChild(el);
+            }
+        }
+
+        function changeMonth(offset) {
+            currentCalDate.setMonth(currentCalDate.getMonth() + offset);
+            renderCalendar();
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            renderHabits();
+            renderCalendar();
+        });
+    </script>
+</body>
+</html>
