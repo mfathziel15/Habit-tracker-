@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+    <!-- PWA Links -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#090b14">
+<script>
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js')
+        .then(() => console.log('Service Worker Terdaftar!'))
+        .catch(err => console.log('Service Worker Gagal:', err));
+    }
+</script>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - Synapse Tracker</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <a href="index.html" class="nav-brand">
+            <i class="fas fa-chart-network"></i> SYNAPSE TRACKER
+        </a>
+        <div class="nav-links">
+            <a href="index.html">Dashboard</a>
+            <a href="profile.html" class="active">Profile</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-title">
+            <h1>USER PROFILE</h1>
+            <p>Identity & Configuration</p>
+        </div>
+
+        <div class="card profile-container">
+            <div class="avatar-section">
+                <div class="avatar"></div>
+                <h2 style="font-family: var(--font-heading); color: var(--text-main);" id="displayName">Subject #001</h2>
+            </div>
+
+            <div class="form-group">
+                <label for="profName">Display Name</label>
+                <input type="text" id="profName" placeholder="Enter your alias...">
+            </div>
+
+            <div class="form-group">
+                <label for="profBio">Core Directive (Bio)</label>
+                <textarea id="profBio" placeholder="What is your main mission?"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="profTarget">Ultimate Goal</label>
+                <input type="text" id="profTarget" placeholder="e.g. Consistency in everything">
+            </div>
+
+            <button class="btn btn-magenta" style="width: 100%; margin-top: 10px;" onclick="saveProfile()">
+                <i class="fas fa-save"></i> Save Configuration
+            </button>
+            <p id="saveMsg" style="color: var(--neon-green); text-align: center; margin-top: 15px; display: none; font-family: var(--font-heading); letter-spacing: 1px;">Settings Applied Successfully!</p>
+        </div>
+    </div>
+
+    <script>
+        // Load Profile Data
+        function loadProfile() {
+            const data = JSON.parse(localStorage.getItem('futuristic_profile')) || {
+                name: '', bio: '', target: ''
+            };
+            
+            document.getElementById('profName').value = data.name;
+            document.getElementById('profBio').value = data.bio;
+            document.getElementById('profTarget').value = data.target;
+            
+            if(data.name) {
+                document.getElementById('displayName').innerText = data.name;
+            }
+        }
+
+        // Save Profile Data
+        function saveProfile() {
+            const data = {
+                name: document.getElementById('profName').value,
+                bio: document.getElementById('profBio').value,
+                target: document.getElementById('profTarget').value
+            };
+            
+            localStorage.setItem('futuristic_profile', JSON.stringify(data));
+            
+            if(data.name) {
+                document.getElementById('displayName').innerText = data.name;
+            }
+
+            const msg = document.getElementById('saveMsg');
+            msg.style.display = 'block';
+            setTimeout(() => { msg.style.display = 'none'; }, 3000);
+        }
+
+        // Init
+        loadProfile();
+    </script>
+</body>
+</html>
