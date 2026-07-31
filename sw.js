@@ -1,9 +1,9 @@
 const CACHE_NAME = 'synapse-tracker-v1';
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/profile.html',
-  '/styles.css'
+  './',
+  './index.html',
+  './profile.html',
+  './styles.css'
 ];
 
 self.addEventListener('install', event => {
