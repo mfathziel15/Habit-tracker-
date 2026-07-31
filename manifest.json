@@ -2,7 +2,7 @@
   "name": "Synapse Habit Tracker",
   "short_name": "Synapse",
   "description": "Futuristic Lifetime Habit Tracker",
-  "start_url": "/index.html",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#090b14",
   "theme_color": "#00f3ff",
