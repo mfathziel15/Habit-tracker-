@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stats - Synapse</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="manifest" href="manifest.json">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="index.html" class="nav-brand"><i class="fas fa-chart-network"></i> SYNAPSE</a>
+        <div class="nav-links">
+            <a href="index.html">Dashboard</a>
+            <a href="habits.html">Habits</a>
+            <a href="stats.html" class="active">Stats</a>
+            <a href="profile.html">Profile</a>
+        </div>
+    </nav>
+    <div class="container">
+        <div class="page-title">
+            <h1>STATISTICS</h1>
+            <p>Analytics & Monthly Calendar</p>
+        </div>
+        
+        <div class="stats-grid" style="margin-bottom: 25px;">
+            <div class="stat-box">
+                <div class="stat-value" id="statCurrent">0</div>
+                <div class="stat-label">Current Streak</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value" id="statBest" style="color: var(--neon-orange); text-shadow: 0 0 10px rgba(255, 94, 0, 0.4);">0</div>
+                <div class="stat-label">Best Streak</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value" id="statTotal" style="color: var(--neon-magenta); text-shadow: 0 0 10px rgba(255, 0, 234, 0.4);">0</div>
+                <div class="stat-label">Total Completed</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value" id="statDays" style="color: var(--neon-green); text-shadow: 0 0 10px rgba(0, 255, 135, 0.4);">0</div>
+                <div class="stat-label">Active Days</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 class="card-title"><i class="fas fa-calendar-check"></i> Monthly Log</h2>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <button class="btn-icon" onclick="changeMonth(-1)"><i class="fas fa-chevron-left"></i></button>
+                <h3 id="monthYearDisplay" style="color: var(--text-main); font-family: var(--font-heading); text-transform: uppercase;">MAY 2026</h3>
+                <button class="btn-icon" onclick="changeMonth(1)"><i class="fas fa-chevron-right"></i></button>
+            </div>
+            <div class="monthly-calendar" id="calendarGrid"></div>
+        </div>
+    </div>
+    <script src="app.js"></script>
+    <script>
+        let currentCalDate = new Date();
+        function renderCalendar() {
+            const calGrid = document.getElementById('calendarGrid');
+            const monthYearText = document.getElementById('monthYearDisplay');
+            calGrid.innerHTML = '';
+            const year = currentCalDate.getFullYear();
+            const month = currentCalDate.getMonth();
+            const options = { month: 'long', year: 'numeric' };
+            monthYearText.innerText = currentCalDate.toLocaleDateString('en-US', options);
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            daysOfWeek.forEach(day => {
+                const el = document.createElement('div');
+                el.className = 'cal-header'; el.innerText = day; calGrid.appendChild(el);
+            });
+            for(let i = 0; i < firstDay; i++) calGrid.appendChild(document.createElement('div'));
+            for(let i = 1; i <= daysInMonth; i++) {
+                const el = document.createElement('div');
+                el.className = 'cal-day'; el.innerText = i;
+                const mStr = String(month + 1).padStart(2, '0');
+                const dStr = String(i).padStart(2, '0');
+                const loopDateStr = `${year}-${mStr}-${dStr}`;
+                if(stats.history.includes(loopDateStr)) el.classList.add('active');
+                if(loopDateStr === todayStr) el.classList.add('today');
+                calGrid.appendChild(el);
+            }
+        }
+        function changeMonth(offset) { currentCalDate.setMonth(currentCalDate.getMonth() + offset); renderCalendar(); }
+        
+        document.addEventListener("DOMContentLoaded", () => {
+            renderCalendar();
+            // Calculate total completions including today
+            let todayCompleted = habits.filter(h => h.completed).length;
+            document.getElementById('statCurrent').innerText = stats.streak;
+            document.getElementById('statBest').innerText = stats.bestStreak;
+            document.getElementById('statTotal').innerText = stats.totalCompleted + todayCompleted;
+            document.getElementById('statDays').innerText = stats.history.length;
+        });
+    </script>
+</body>
+</html>
